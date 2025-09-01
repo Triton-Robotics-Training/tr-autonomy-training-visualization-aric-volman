@@ -1,2 +1,0 @@
-vision_msgs/Detection2DArray detection_info
-sensor_msgs/Image image

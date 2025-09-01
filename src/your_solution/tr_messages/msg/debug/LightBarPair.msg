@@ -1,2 +1,0 @@
-tr_messages/LightBar left
-tr_messages/LightBar right

@@ -60,15 +60,11 @@ class FramePublisher(Node):
             1)
 
     def true_pose_handler(self, msg):
-        self.true_pose_first_robot = msg.primary_robot.chassis_pose
+        self.true_pose_first_robot = msg.primary_robot.camera_pose
         self.true_pose_second_panels = msg.secondary_robot.armor_panel_poses
 
         if self.true_pose_first_robot:
-
-            # Problem: predicted plate is 90 degrees from the true plates
-            # self.true_pose_first_robot = self.apply_quat(self.true_pose_first_robot)
-
-            self.create_pose_message('map', 'camera_frame', self.true_pose_first_robot, self.true_pose_transform)
+            self.create_pose_message('map', 'camera_frame',self.true_pose_first_robot, self.true_pose_transform)
 
         if self.true_pose_second_panels:
             self.create_pose_message('map', 'panel_0', self.true_pose_second_panels[0], self.panel_0)
@@ -77,7 +73,7 @@ class FramePublisher(Node):
             self.create_pose_message('map', 'panel_3', self.true_pose_second_panels[3], self.panel_3)
 
 
-        self.get_logger().info(f'Received true pose: "{self.true_pose_first_robot}"') 
+        # self.get_logger().info(f'Received true pose: "{self.true_pose_first_robot}"') 
         
     def detections_handler(self, msg):
         self.detections_msg = msg.detection_info
@@ -85,14 +81,12 @@ class FramePublisher(Node):
         if self.detections_msg:
             detection = self.detections_msg.detections[0]
             if detection.results:
-                pose = detection.results[0].pose.pose
-                self.get_logger().info(f'Sent Detection!') 
-                self.create_pose_message('camera_frame', 'detected_panel', pose, self.detected_panel)
+                detected_pose = detection.results[0].pose.pose
+                self.create_pose_message('camera_frame', 'detected_panel', detected_pose, self.detected_panel)
 
-        self.get_logger().info(f'Received detection: "{self.detections_msg}"') 
+        # self.get_logger().info(f'Received detection: "{self.detections_msg}"') 
     
     # Utility function to create message so I don't have to do it manually
-    # Having problems with detected_panel currently
     def create_pose_message(self, parent_str, child_str, pose, t):
         
         t.header.frame_id = parent_str
@@ -102,7 +96,7 @@ class FramePublisher(Node):
         t.transform.translation.y = pose.position.y
         t.transform.translation.z = pose.position.z
 
-        quaternion = self.true_pose_first_robot.orientation
+        quaternion = pose.orientation
 
         t.transform.rotation.x = quaternion.x
         t.transform.rotation.y = quaternion.y
@@ -111,21 +105,6 @@ class FramePublisher(Node):
 
         t.header.stamp = self.get_clock().now().to_msg()
         self.tf_broadcaster.sendTransform(t)
-
-    def apply_quat(self, pose):
-        rotation = quaternion_from_euler(0, 0,math.radians(math.pi/2))
-        original = [pose.orientation.x,
-                    pose.orientation.y,
-                    pose.orientation.z,
-                    pose.orientation.w]
-                
-        new_q = tf_transformations.quaternion_multiply(rotation, original)
-                
-        pose.orientation.x = new_q[0]
-        pose.orientation.y = new_q[1]
-        pose.orientation.z = new_q[2]
-        pose.orientation.w = new_q[3]
-        return pose
 
 def main():
     rclpy.init()
