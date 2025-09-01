@@ -86,7 +86,7 @@ class FramePublisher(Node):
             detection = self.detections_msg.detections[0]
             if detection.results:
                 pose = detection.results[0].pose.pose
-
+                self.get_logger().info(f'Sent Detection!') 
                 self.create_pose_message('camera_frame', 'detected_panel', pose, self.detected_panel)
 
         self.get_logger().info(f'Received detection: "{self.detections_msg}"') 
@@ -94,7 +94,7 @@ class FramePublisher(Node):
     # Utility function to create message so I don't have to do it manually
     # Having problems with detected_panel currently
     def create_pose_message(self, parent_str, child_str, pose, t):
-        t.header.stamp = self.get_clock().now().to_msg()
+        
         t.header.frame_id = parent_str
         t.child_frame_id = child_str
 
@@ -109,7 +109,7 @@ class FramePublisher(Node):
         t.transform.rotation.z = quaternion.z
         t.transform.rotation.w = quaternion.w
 
-
+        t.header.stamp = self.get_clock().now().to_msg()
         self.tf_broadcaster.sendTransform(t)
 
     def apply_quat(self, pose):
