@@ -14,5 +14,8 @@
   <node pkg="your_solution" exec="tf_broadcaster">
     <param name="use_sim_time" value="true"/>
   </node>
+  <node pkg="your_solution" exec="calc_error">
+    <param name="use_sim_time" value="true"/>
+  </node>
 
 </launch>

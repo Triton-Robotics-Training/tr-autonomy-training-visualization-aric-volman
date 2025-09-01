@@ -20,7 +20,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-            'tf_broadcaster = your_solution.tf_broadcaster:main'
+            'tf_broadcaster = your_solution.tf_broadcaster:main',
+            'calc_error = calc_error.calc_error:main'
         ],
     },
 )
