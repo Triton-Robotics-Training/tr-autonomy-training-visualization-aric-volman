@@ -69,27 +69,27 @@ class CalcError(Node):
             current_time = measured_time
         
         # Try to see if detected panel exists yet
-        if (self.tf_buffer.can_transform('detected_panel', 'map', current_time)):
+        if (self.tf_buffer.can_transform('map', 'detected_panel', current_time)):
             self.detected_panel = self.tf_buffer.lookup_transform( # Look up transform
+              'map',
               'detected_panel',
-             'map',
                 current_time)
         
         for i in range(0, 4):
             # Check if true panels exist yet
-            if (self.tf_buffer.can_transform(('panel_' + str(i)), 'map', current_time)):
+            if (self.tf_buffer.can_transform('map', ('panel_' + str(i)), current_time)):
                 self.true_panel_list[i] = self.tf_buffer.lookup_transform( # Look up transform
-                    ('panel_' + str(i)),
                     'map',
+                    ('panel_' + str(i)),
                     current_time)
                 
         return current_time # Return current time for use later
 
     def panel_exists(self, num, current_time):
-        return self.tf_buffer.can_transform(('panel_' + str(num)), 'map', current_time)
+        return self.tf_buffer.can_transform('map', ('panel_' + str(num)), current_time)
 
     def detection_exists(self, current_time):
-        return self.tf_buffer.can_transform('detected_panel', 'map', current_time)
+        return self.tf_buffer.can_transform('map', 'detected_panel', current_time)
 
     def ret_closest_true_panel(self, current_time):
 
