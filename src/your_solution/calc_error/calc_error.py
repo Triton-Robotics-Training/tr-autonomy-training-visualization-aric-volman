@@ -93,39 +93,37 @@ class CalcError(Node):
 
     def ret_closest_true_panel(self, current_time):
 
-        initial_num = 3
- 
-        # Compute the first error for sorting purposes
-        x_err_smallest = self.true_panel_list[initial_num].transform.translation.x - self.detected_panel.transform.translation.x
-        y_err_smallest = self.true_panel_list[initial_num].transform.translation.y - self.detected_panel.transform.translation.y
-        z_err_smallest = self.true_panel_list[initial_num].transform.translation.z - self.detected_panel.transform.translation.z
+        x_err = [None] * 4
+        y_err = [None] * 4
+        z_err = [None] * 4
 
-        # Compute mean error for overall error
-        smallest_err = (abs(x_err_smallest) + abs(y_err_smallest))/2.0
-        smallest_panel_num = initial_num
+        total_err = [None] * 4
 
-        # Tried to track closest panel (not working well)
-        '''
-        for i in range(1, 4):
-            x_err_current = self.true_panel_list[i].transform.translation.x - self.detected_panel.transform.translation.x
-            y_err_current = self.true_panel_list[i].transform.translation.y - self.detected_panel.transform.translation.y
-            z_err_current = self.true_panel_list[i].transform.translation.z - self.detected_panel.transform.translation.z
+        for i in range(0,4):
 
-            # Tried RMSE but idk if it works or not
-            # total_err_current = math.sqrt(x_err_current**2 + y_err_current**2 + z_err_current**2)
+            if self.panel_exists(i, current_time) and self.detection_exists(current_time):
+                self.get_logger().info("\r\nStarting comparison of panel #:" + str(i))
 
-            total_err_current = (abs(x_err_current) + abs(y_err_current))/2.0
-            smallest_panel_num = 0
+                # Compute the error from the detection
+                x_err[i]= self.true_panel_list[i].transform.translation.x - self.detected_panel.transform.translation.x
+                y_err[i] = self.true_panel_list[i].transform.translation.y - self.detected_panel.transform.translation.y
+                z_err[i] = self.true_panel_list[i].transform.translation.z - self.detected_panel.transform.translation.z
 
-            # Compare current nth+1 panel error to last smallest error
-            if total_err_current < smallest_err:
-                    smallest_err = total_err_current
-                    x_err_smallest = x_err_current
-                    y_err_smallest = y_err_current
-                    z_err_smallest = z_err_current
-                    smallest_panel_num = i
-        '''
-        return x_err_smallest, y_err_smallest, z_err_smallest, smallest_panel_num
+
+                self.get_logger().info("X of panel: " + str(self.true_panel_list[i].transform.translation.x))
+                self.get_logger().info("Y of panel: " + str(self.true_panel_list[i].transform.translation.y))
+                self.get_logger().info("Z of panel: " + str(self.true_panel_list[i].transform.translation.z) + "\n\r")
+
+
+                # Compute Root Mean Squared Error (RMSE)
+                # total_err[i] = math.sqrt((x_err[i]**2 + y_err[i]**2 + z_err[i]**2)/3)
+                total_err[i] = math.sqrt((x_err[i]**2 + y_err[i]**2)/2.0)
+
+        filtered_err = list(filter(lambda x: x is not None, total_err))
+
+        i_min = total_err.index(min(filtered_err, default=None))
+
+        return x_err[i_min], y_err[i_min], z_err[i_min], i_min
     
     def loop_timer(self):
         # Lookup transforms and current time
@@ -135,20 +133,22 @@ class CalcError(Node):
         # Currently error is too big to be real (when panel and detected panel are close, error is too big)
         x_err, y_err, z_err, panel_num = self.ret_closest_true_panel(current_time)
 
-        # Publish error
-        self.publish_float_msg(x_err, self.x_err_publisher, "X error")
-        self.publish_float_msg(y_err, self.y_err_publisher, "Y error")
-        self.publish_float_msg(z_err, self.z_err_publisher, "Z error")
+        if x_err != None:
 
-        self.get_logger().info("Closest panel is: " + str(panel_num))
+            # Publish error
+            self.publish_float_msg(x_err, self.x_err_publisher, "X error")
+            self.publish_float_msg(y_err, self.y_err_publisher, "Y error")
+            self.publish_float_msg(z_err, self.z_err_publisher, "Z error")
 
-        self.get_logger().info("X of closest panel: " + str(self.true_panel_list[panel_num].transform.translation.x))
-        self.get_logger().info("Y of closest panel: " + str(self.true_panel_list[panel_num].transform.translation.y))
-        self.get_logger().info("Z of closest panel: " + str(self.true_panel_list[panel_num].transform.translation.z))
+            self.get_logger().info("Closest panel is: " + str(panel_num))
 
-        self.get_logger().info("X of detected panel: " + str(self.detected_panel.transform.translation.x))
-        self.get_logger().info("Y of detected panel: " + str(self.detected_panel.transform.translation.y))
-        self.get_logger().info("Z of detected panel: " + str(self.detected_panel.transform.translation.z))
+            self.get_logger().info("X of closest panel: " + str(self.true_panel_list[panel_num].transform.translation.x))
+            self.get_logger().info("Y of closest panel: " + str(self.true_panel_list[panel_num].transform.translation.y))
+            self.get_logger().info("Z of closest panel: " + str(self.true_panel_list[panel_num].transform.translation.z))
+
+            self.get_logger().info("X of detected panel: " + str(self.detected_panel.transform.translation.x))
+            self.get_logger().info("Y of detected panel: " + str(self.detected_panel.transform.translation.y))
+            self.get_logger().info("Z of detected panel: " + str(self.detected_panel.transform.translation.z))
 
     def publish_float_msg(self, float_data, pub, description):
         msg = Float32()
