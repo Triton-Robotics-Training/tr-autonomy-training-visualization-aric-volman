@@ -63,6 +63,7 @@ class FramePublisher(Node):
         self.true_pose_first_robot = msg.primary_robot.camera_pose
         self.true_pose_second_panels = msg.secondary_robot.armor_panel_poses
 
+        # TODO probably dont need these to be member variables 
         if self.true_pose_first_robot:
             self.create_pose_message('map', 'camera_frame',self.true_pose_first_robot, self.true_pose_transform)
 
@@ -87,6 +88,7 @@ class FramePublisher(Node):
         # self.get_logger().info(f'Received detection: "{self.detections_msg}"') 
     
     # Utility function to create message so I don't have to do it manually
+    # TODO maybe add type hints for the parameters
     def create_pose_message(self, parent_str, child_str, pose, t):
         
         t.header.frame_id = parent_str
@@ -96,6 +98,7 @@ class FramePublisher(Node):
         t.transform.translation.y = pose.position.y
         t.transform.translation.z = pose.position.z
 
+        # TODO nit you can do transform.orientation = pose.orientation directly
         quaternion = pose.orientation
 
         t.transform.rotation.x = quaternion.x
@@ -103,6 +106,7 @@ class FramePublisher(Node):
         t.transform.rotation.z = quaternion.z
         t.transform.rotation.w = quaternion.w
 
+        # TODO incorrect timestamp
         t.header.stamp = self.get_clock().now().to_msg()
         self.tf_broadcaster.sendTransform(t)
 

@@ -123,6 +123,7 @@ class CalcError(Node):
 
                 # Compute Root Mean Squared Error (RMSE)
                 # total_err[i] = math.sqrt((x_err[i]**2 + y_err[i]**2 + z_err[i]**2)/3)
+                # TODO include z error
                 total_err[i] = math.sqrt((x_err[i]**2 + y_err[i]**2)/2.0)
 
         # Filter out nones (i.e. if one true panel exists but the others don't)
@@ -139,6 +140,7 @@ class CalcError(Node):
         self.lookup_transforms()
 
         # Try to find the error
+        # TODO clean up comments
         # Currently error is too big to be real (when panel and detected panel are close, error is too big)
         x_err, y_err, z_err, panel_num = self.ret_closest_true_panel()
 

@@ -1,21 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <launch>
+  <!-- TODO put inside your solution. Make a python launch file -->
   <node pkg="sim_node" exec="sim_node">
-    <param name="human_gui" value="false"/>
-    <param name="cv_exposure" value="0.8"/>
-    <param name="cpu_sim" value="true"/>
+    <param name="human_gui" value="false" />
+    <param name="cv_exposure" value="0.8" />
+    <param name="cpu_sim" value="true" />
   </node>
 
   <node pkg="sim_node" exec="keyboard_controls">
   </node>
   <node pkg="huskybot_cv" exec="huskybot_cv">
-    <param name="use_sim_time" value="true"/>
+    <param name="use_sim_time" value="true" />
   </node>
   <node pkg="your_solution" exec="tf_broadcaster">
-    <param name="use_sim_time" value="true"/>
+    <param name="use_sim_time" value="true" />
   </node>
   <node pkg="your_solution" exec="calc_error">
-    <param name="use_sim_time" value="true"/>
+    <param name="use_sim_time" value="true" />
   </node>
 
 </launch>
