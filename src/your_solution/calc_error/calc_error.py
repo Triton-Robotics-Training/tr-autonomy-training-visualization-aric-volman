@@ -122,9 +122,7 @@ class CalcError(Node):
 
 
                 # Compute Root Mean Squared Error (RMSE)
-                # total_err[i] = math.sqrt((x_err[i]**2 + y_err[i]**2 + z_err[i]**2)/3)
-                # TODO include z error
-                total_err[i] = math.sqrt((x_err[i]**2 + y_err[i]**2)/2.0)
+                total_err[i] = math.sqrt((x_err[i]**2 + y_err[i]**2 + z_err[i]**2)/3.0)
 
         # Filter out nones (i.e. if one true panel exists but the others don't)
         filtered_err = list(filter(lambda x: x is not None, total_err))
@@ -140,8 +138,6 @@ class CalcError(Node):
         self.lookup_transforms()
 
         # Try to find the error
-        # TODO clean up comments
-        # Currently error is too big to be real (when panel and detected panel are close, error is too big)
         x_err, y_err, z_err, panel_num = self.ret_closest_true_panel()
 
         # Only publish error if it exists (not none)
@@ -164,10 +160,10 @@ class CalcError(Node):
             self.get_logger().info("Z of detected panel: " + str(self.detected_panel.transform.translation.z))
 
     # A message too annoying to do by hand
-    def publish_float_msg(self, float_data, pub, description):
+    def publish_float_msg(self, float_data: Float32, publisher, description: str):
         msg = Float32()
         msg.data = float_data
-        pub.publish(msg)
+        publisher.publish(msg)
         self.get_logger().info("Publishing " + description + ": " + str(msg.data))
 
     def convert_ms_to_seconds(self, millis):
